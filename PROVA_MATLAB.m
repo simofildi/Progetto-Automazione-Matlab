@@ -11,7 +11,8 @@ if ~exist('tel', 'var') || ~isa(tel, 'Telefono') || ~isvalid(tel)
     tel = Telefono();                        % 1. collegamento: compare il QR code
 end
 r = Riconoscitore("oggetti");                % 2. riconoscimento: scegliete il modello
-r.Soglia = 0.30;
+r.Soglia = 0.30;                              %    punteggio minimo (0..1)
+r.MaxOggetti = 10;                           %    al massimo 10 oggetti
 % r.Classi = ["person", "bottle", "cup"];    %    (facoltativo) solo questi oggetti
 
 f = figure('Name', 'Prova MATLAB', 'Color', 'w');
