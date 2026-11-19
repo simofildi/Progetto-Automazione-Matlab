@@ -218,6 +218,7 @@ classdef Riconoscitore < handle
             creatoCon = "R" + string(version('-release'));     % versione di MATLAB che ha salvato rete.mat
             save(fullfile(cartella, 'rete.mat'), 'net', 'etichette', 'lato', 'creatoCon');
             writelines(etichette, fullfile(cartella, 'etichette.txt'));
+            writelines(creatoCon, fullfile(cartella, 'versione_matlab.txt'));
             if copiaOnnx, copyfile(temp, fullfile(cartella, 'rete.onnx')); end
             Riconoscitore.svuotaMemoria();
         end
@@ -344,12 +345,11 @@ end
 
 function ok = matUsabile(file)
 % rete.mat si puo' aprire solo con la stessa versione di MATLAB che l'ha salvato, o una piu' nuova.
+% La versione e' scritta in versione_matlab.txt, accanto a rete.mat (senza aprire rete.mat).
 if getenv('KIT_TELEFONO_USA_ONNX') == "1", ok = false; return; end      % solo per le prove
-creatoCon = "R2026b";                             % i primi modelli del kit, salvati senza questa informazione
-w = whos('-file', file);
-if any(strcmp({w.name}, 'creatoCon'))
-    c = load(file, 'creatoCon'); creatoCon = c.creatoCon;
-end
+creatoCon = "R2026b";                             % i primi modelli del kit
+f = fullfile(fileparts(file), 'versione_matlab.txt');
+if isfile(f), creatoCon = strtrim(string(fileread(f))); end
 ok = ~isMATLABReleaseOlderThan(creatoCon);
 end
 
