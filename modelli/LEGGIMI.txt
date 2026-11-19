@@ -1,0 +1,18 @@
+MODELLI (le reti YOLOE che riconoscono gli oggetti)
+
+oggetti     80 oggetti comuni: person, bottle, cup, cell phone, chair, laptop, ...
+frutta      apple, pear, orange, banana, lemon
+bottiglie   coca-cola bottle, water bottle, aluminum can, glass
+
+Si usano per nome:
+  MATLAB:    r = Riconoscitore("frutta");
+  Simulink:  doppio clic sul blocco Riconoscitore, campo "Modello"
+  Elenco:    Riconoscitore.modelli()
+
+Ogni modello e' una cartella: non modificatela.
+  rete.mat          la rete
+  etichette.txt     le cose che riconosce, una per riga
+  +rete_<nome>/     pezzi della rete generati da MATLAB
+
+Volete riconoscere altre cose? Chiedete al docente un modello nuovo:
+ve lo da' come cartella, da copiare qui dentro.

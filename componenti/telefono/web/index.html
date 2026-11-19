@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MATLAB Cam">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icona.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icona.svg">
+  <link rel="stylesheet" href="style.css?v=4">
+  <title>MATLAB Cam</title>
+</head>
+<body>
+
+<!-- simboli (stile SF Symbols) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-gira" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M4 9.5A8 8 0 0 1 18.4 6.6M20 14.5a8 8 0 0 1-14.4 2.9M18.6 3v3.8h-3.8M5.4 21v-3.8h3.8"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-lente" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M15.5 15.5L20 20"/></symbol>
+  <symbol id="i-indietro" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M9 5L4 10l5 5M4 10h10a6 6 0 0 1 0 12h-3"/></symbol>
+  <symbol id="i-telefono" viewBox="0 0 40 40"><rect x="11" y="3" width="18" height="34" rx="4.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M17.5 7.5h5"/></symbol>
+  <symbol id="i-pc" viewBox="0 0 40 40"><rect x="5" y="8" width="30" height="19" rx="2.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M2 32h36"/></symbol>
+</svg>
+
+<!-- ============ SCHERMATA 1: COLLEGAMENTO ============ -->
+<section id="schermo-accoppia" class="schermo attivo">
+  <main class="colonna">
+    <header class="intestazione">
+      <img src="icona.svg" class="logo" alt="">
+      <h1>MATLAB Cam</h1>
+      <p class="sottotitolo">La fotocamera del telefono, l'analisi in MATLAB.</p>
+    </header>
+
+    <div id="box-stato" class="gruppo">
+      <div class="riga"><span id="spinner" class="spinner"></span><span id="testo-stato" class="riga-testo">Collegamento al PC…</span></div>
+      <p id="dettaglio-stato" class="piede"></p>
+    </div>
+
+    <form id="form-codice" class="nascosto" autocomplete="off">
+      <p class="titolo-sezione">Codice mostrato in MATLAB</p>
+      <div class="gruppo">
+        <input id="campo-codice" maxlength="6" placeholder="K7P2QX" autocapitalize="characters" spellcheck="false" inputmode="text" aria-label="Codice">
+      </div>
+      <button type="submit" class="bottone pieno">Collega</button>
+      <p class="piede-sezione">Oppure inquadra il QR code della finestra MATLAB con la fotocamera del telefono.</p>
+    </form>
+
+    <div id="box-collegato" class="nascosto">
+      <div class="gruppo collegati">
+        <div class="coppia">
+          <div class="disp"><svg class="glifo"><use href="#i-telefono"/></svg><span>Questo telefono</span></div>
+          <div class="filo"><span></span><span></span><span></span></div>
+          <div class="disp"><svg class="glifo"><use href="#i-pc"/></svg><span id="nome-pc">PC</span></div>
+        </div>
+        <p class="esito-ok"><span class="punto"></span>Collegati</p>
+      </div>
+      <button id="avvia-camera" class="bottone pieno">Apri la fotocamera</button>
+      <p id="nota-https" class="piede-sezione nascosto">Questa pagina non è in HTTPS, quindi il browser permette solo le foto singole.
+        Per il video apri il link <b>https</b> del QR code.</p>
+    </div>
+
+    <p class="titolo-sezione spazio">Aiuto</p>
+    <details class="gruppo aiuto">
+      <summary>Non si collega?</summary>
+      <ul>
+        <li>Telefono e PC devono essere sulla <b>stessa rete</b>: la cosa più semplice è collegare il PC all'<b>hotspot</b> del telefono e premere <i>Aggiorna rete</i> in MATLAB.</li>
+        <li>Al primo collegamento il browser avvisa che il certificato non è attendibile: è normale, lo crea il tuo PC. Scegli <i>Mostra dettagli → Visita il sito</i> (iPhone) o <i>Avanzate → Procedi</i> (Android).</li>
+        <li>Se il Mac chiede di consentire a MATLAB le connessioni in entrata, rispondi <i>Consenti</i>.</li>
+      </ul>
+    </details>
+  </main>
+</section>
+
+<!-- ============ SCHERMATA 2: FOTOCAMERA ============ -->
+<section id="schermo-camera" class="schermo">
+  <video id="video" playsinline muted autoplay></video>
+  <img id="foto" class="nascosto" alt="">
+  <canvas id="sovrapposizione"></canvas>
+
+  <header class="barra-alta">
+    <div class="riga-pillole">
+      <div id="pillola" class="pillola vetro"><span class="led"></span>
+        <span class="due-righe"><b id="pillola-testo">Collegato</b><small id="pillola-info"></small></span></div>
+      <div id="pillola-matlab" class="pillola vetro spenta"><span class="led"></span>
+        <span class="due-righe"><b>MATLAB</b><small id="pillola-matlab-info">in attesa</small></span></div>
+      <button id="btn-esci" class="tondo piccolo vetro" aria-label="Scollega"><svg><use href="#i-x"/></svg></button>
+    </div>
+    <div id="cerco" class="cerco vetro nascosto"><svg><use href="#i-lente"/></svg><span id="cerco-testo"></span></div>
+  </header>
+
+  <footer class="pannello">
+    <div id="risultato" class="risultato vetro vuoto">
+      <div id="ris-titolo" class="ris-titolo">In attesa di MATLAB…</div>
+      <div id="ris-dettaglio" class="ris-dettaglio">Il telefono invia le immagini, l'analisi la fa il tuo programma MATLAB.</div>
+      <div id="ris-voci" class="voci"></div>
+    </div>
+
+    <div id="modo" class="segmentato vetro" role="tablist" aria-label="Modalità">
+      <span class="cursore"></span>
+      <button data-modo="video" role="tab" class="attivo">Video</button>
+      <button data-modo="foto" role="tab">Foto</button>
+    </div>
+
+    <div class="comandi">
+      <button id="btn-qualita" class="tondo vetro testo" aria-label="Qualità dell'immagine">640</button>
+      <button id="btn-centrale" class="otturatore video" aria-label="Pausa"><span class="interno"></span>
+        <svg class="icona-indietro"><use href="#i-indietro"/></svg></button>
+      <button id="btn-gira" class="tondo vetro" aria-label="Cambia fotocamera"><svg><use href="#i-gira"/></svg></button>
+    </div>
+  </footer>
+  <input id="input-foto" type="file" accept="image/*" capture="environment" class="nascosto">
+</section>
+
+<script src="app.js?v=4"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+IL MIO PROGETTO
+
+Questa cartella e' vostra: salvate qui tutti i vostri file.
+
+Per iniziare copiate qui un esempio e dategli un nome vostro, per esempio:
+  PROVA_MATLAB.m      ->  il_mio_progetto/rischio_mele.m
+  PROVA_SIMULINK.slx  ->  il_mio_progetto/rischio_mele.slx
+(in Simulink: File > Save As, scegliete questa cartella)
+
+Gli esempi copiati qui funzionano lo stesso: trovano da soli il resto del kit.

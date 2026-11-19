@@ -1,0 +1,19 @@
+COMPONENTI DEL KIT - NON MODIFICATE NIENTE QUI DENTRO
+
+Sono i pezzi pronti che usate dai vostri programmi. Non serve aprirli.
+
+telefono/          collegamento telefono <-> PC
+  Telefono.m         la classe che usate:  tel = Telefono();  tel.snapshot();  tel.inviaRisultato(r);
+  ponte.jar          il piccolo server che gira dentro MATLAB e riceve le foto
+  riserva.jks        certificato di riserva per la connessione sicura (https)
+  web/               la pagina che si apre sul telefono
+
+riconoscimento/    riconoscimento di oggetti
+  Riconoscitore.m    la classe che usate:  r = Riconoscitore("frutta");  ogg = r.rileva(img);
+
+simulink/          funzioni chiamate dai tre blocchi di blocchi_telefono.slx
+  telefono_fotocamera.m, riconoscitore_simulink.m, telefono_schermo.m   (una per blocco)
+  riconoscitore_scegli.m      la finestra "Scegli modello e oggetti dall'elenco"
+  telefono_avvio_automatico.m fa partire la simulazione da sola quando il telefono invia le foto
+  telefono_condiviso.m, parametri_blocco.m                             (di servizio)
+  slblocks.m         fa comparire i blocchi nel Library Browser di Simulink
