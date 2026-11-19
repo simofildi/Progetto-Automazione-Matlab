@@ -27,7 +27,8 @@ end
 if usejava('jvm')
     fprintf('[ok] Java attivo (serve al collegamento con il telefono)\n');
 else
-    fprintf('[!!] Java non attivo: riavviate MATLAB normalmente.\n');
+    fprintf(['[!!] Java non trovato (serve al collegamento con il telefono). Installate il pacchetto gratuito\n' ...
+             '     "MATLAB Support for OpenJDK" (cercatelo su File Exchange, numero 180823), poi riavviate MATLAB.\n']);
     problemi = problemi + 1;
 end
 

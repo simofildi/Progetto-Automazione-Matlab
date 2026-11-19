@@ -169,32 +169,41 @@ classdef Riconoscitore < handle
             e = e(e ~= "");
         end
 
-        function cartella = prepara(nome, fileOnnx, etichette, destinazione)
+        function cartella = prepara(nome, fileOnnx, etichette, destinazione, copiaOnnx)
         %PREPARA  (docente) Trasforma un file .onnx di Ultralytics in un modello del kit.
         %   Serve "Deep Learning Toolbox Converter for ONNX Model Format".
-        %   Crea la cartella destinazione/nome con rete.mat, etichette.txt e i
-        %   livelli generati da MATLAB (+rete_nome).
+        %   Crea la cartella destinazione/nome con rete.mat, rete.onnx, etichette.txt
+        %   e i livelli generati da MATLAB (+rete_nome). rete.onnx serve ai PC con un
+        %   MATLAB piu' vecchio: li' il modello viene ricreato da rete.onnx.
             arguments
                 nome (1,1) string
                 fileOnnx (1,1) string
                 etichette string
                 destinazione (1,1) string = cartellaModelli()
+                copiaOnnx (1,1) logical = true
             end
             if isempty(which('importNetworkFromONNX'))
                 error('Riconoscitore:onnx', ['Manca "Deep Learning Toolbox Converter for ONNX Model Format": ' ...
-                    'installatelo da Home > Add-Ons > Get Add-Ons.']);
+                    'installatelo da Home > Add-Ons > Get Add-Ons (e'' gratuito).']);
             end
             fileOnnx = assoluto(fileOnnx);
             etichette = etichette(:);
             cartella = fullfile(destinazione, nome);
             spazio = "rete_" + matlab.lang.makeValidName(nome);
+            temp = string(tempname) + ".onnx";
+            copyfile(fileOnnx, temp);                  % il .onnx potrebbe stare proprio nella cartella da rifare
+            pulisci = onCleanup(@() delete(temp));
             if isfolder(cartella), rmdir(cartella, 's'); end
             mkdir(cartella);
             vecchia = cd(cartella);
             ripristina = onCleanup(@() cd(vecchia));
             avvisi = warning('off', 'all');
             ripristinaAvvisi = onCleanup(@() warning(avvisi));
-            net = importNetworkFromONNX(fileOnnx, Namespace = spazio, GenerateCoderFiles = false);
+            try
+                net = importNetworkFromONNX(temp, Namespace = spazio, GenerateCoderFiles = false);
+            catch
+                net = importNetworkFromONNX(temp, Namespace = spazio);   % MATLAB senza questa opzione
+            end
             clear ripristinaAvvisi
             prova = extractdata(predict(net, dlarray(zeros(640, 640, 3, 'single'), 'SSCB')));
             if mod(numel(prova), 4 + numel(etichette)) ~= 0 || numel(prova) / (4 + numel(etichette)) < 100
@@ -202,8 +211,10 @@ classdef Riconoscitore < handle
                     'Esportate da Ultralytics con nms=False.'], numel(prova), numel(etichette));
             end
             lato = 640;
-            save(fullfile(cartella, 'rete.mat'), 'net', 'etichette', 'lato');
+            creatoCon = "R" + string(version('-release'));     % versione di MATLAB che ha salvato rete.mat
+            save(fullfile(cartella, 'rete.mat'), 'net', 'etichette', 'lato', 'creatoCon');
             writelines(etichette, fullfile(cartella, 'etichette.txt'));
+            if copiaOnnx, copyfile(temp, fullfile(cartella, 'rete.onnx')); end
             Riconoscitore.svuotaMemoria();
         end
 
@@ -274,6 +285,7 @@ if isfolder(nome) && contains(nome, ["/", "\"])               % percorso di una 
 else
     cartella = fullfile(cartellaModelli(), nome);
 end
+[~, nomeCartella] = fileparts(cartella);
 file = fullfile(cartella, 'rete.mat');
 m = memoriaModelli();
 chiave = char(file);                              % percorso completo: copie diverse del kit non si confondono
@@ -294,10 +306,47 @@ if ~isfile(file)
             nome, strjoin(disponibili, ', '));
     end
 end
+
+if ~matUsabile(file)
+    % rete.mat e' stato salvato da un MATLAB piu' nuovo: si ricrea il modello da rete.onnx,
+    % una volta sola, in una cartella di questo PC (prefdir, diversa per ogni versione di MATLAB)
+    onnx = fullfile(cartella, 'rete.onnx');
+    if ~isfile(onnx)
+        error('Riconoscitore:versione', ['Il modello "%s" e'' stato preparato con un MATLAB piu'' recente ' ...
+            'del vostro (%s). Aggiornate MATLAB oppure chiedete al docente il modello con il file rete.onnx.'], ...
+            nomeCartella, "R" + version('-release'));
+    end
+    cache = fullfile(prefdir, 'KitTelefono_modelli');
+    file = fullfile(cache, nomeCartella, 'rete.mat');
+    dOnnx = dir(onnx); dMat = dir(file);
+    if isempty(dMat) || dMat.datenum < dOnnx.datenum
+        if isempty(which('importNetworkFromONNX'))
+            error('Riconoscitore:onnx', ['Il vostro MATLAB (%s) e'' piu'' vecchio di quello che ha preparato ' ...
+                'i modelli. Installate "Deep Learning Toolbox Converter for ONNX Model Format" da ' ...
+                'Home > Add-Ons > Get Add-Ons (e'' gratuito) e riprovate.'], "R" + version('-release'));
+        end
+        fprintf(['[Riconoscitore] Preparo il modello "%s" per il vostro MATLAB ' ...
+            '(solo la prima volta, circa 20 secondi)...\n'], nomeCartella);
+        e = strip(splitlines(string(fileread(fullfile(cartella, 'etichette.txt'))))); e = e(e ~= "");
+        Riconoscitore.prepara(nomeCartella, onnx, e, cache, false);
+    end
+    cartella = fullfile(cache, nomeCartella);
+end
 addpath(cartella);                                % i livelli generati (+rete_...)
 v = load(file, 'net', 'etichette', 'lato');
 net = v.net; etichette = string(v.etichette(:)); lato = v.lato;
 m(chiave) = struct('net', net, 'etichette', etichette, 'lato', lato); %#ok<NASGU> (handle)
+end
+
+function ok = matUsabile(file)
+% rete.mat si puo' aprire solo con la stessa versione di MATLAB che l'ha salvato, o una piu' nuova.
+if getenv('KIT_TELEFONO_USA_ONNX') == "1", ok = false; return; end      % solo per le prove
+creatoCon = "R2026b";                             % i primi modelli del kit, salvati senza questa informazione
+w = whos('-file', file);
+if any(strcmp({w.name}, 'creatoCon'))
+    c = load(file, 'creatoCon'); creatoCon = c.creatoCon;
+end
+ok = ~isMATLABReleaseOlderThan(creatoCon);
 end
 
 function m = memoriaModelli(svuota)

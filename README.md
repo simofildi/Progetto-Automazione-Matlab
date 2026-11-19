@@ -44,6 +44,8 @@ La guida completa è qui sotto, ed è anche nel file [`GUIDA.pdf`](GUIDA.pdf).
 | Manca Simulink, Image Processing Toolbox o Deep Learning Toolbox | **Home → Add-Ons → Get Add-Ons**, cercate il nome e installatelo |
 | Il riconoscimento non parte | Controllate che la cartella `modelli` contenga oggetti, frutta e bottiglie |
 | Il PC non è collegato a nessuna rete | Collegate il PC al Wi-Fi |
+| Java non trovato | Installate il pacchetto gratuito [MATLAB Support for OpenJDK](https://www.mathworks.com/matlabcentral/fileexchange/180823-matlab-support-for-openjdk) (pulsante **Download**, poi doppio clic sul file scaricato) e riavviate MATLAB. Succede soprattutto sui Mac con MATLAB recente |
+| Il vostro MATLAB è più vecchio di quello che ha preparato i modelli (per esempio R2025b) | Installate anche **Deep Learning Toolbox Converter for ONNX Model Format** (Home → Add-Ons, gratuito). La prima volta ogni modello viene preparato per il vostro PC in circa 20 secondi, poi parte subito |
 
 **Niente Python, niente installazioni.** La rete YOLOE gira dentro MATLAB con Deep Learning Toolbox, che fa parte della licenza della scuola. I modelli li prepara il docente e sono già nel kit.
 
@@ -158,4 +160,6 @@ Al posto della Constant mettete la vostra logica: contare gli oggetti, confronta
 | Ho chiuso la finestra del QR | Il collegamento resta attivo: `tel.mostra()` la riapre |
 | Un oggetto non viene mai trovato | Abbassate la soglia, oppure controllate con `r.trova("...")` che l'etichetta sia nel modello |
 | "Il modello non conosce: …" | Scegliete tra le etichette elencate nel messaggio, oppure chiedete un modello nuovo al docente |
+| "Java non trovato" oppure "no runtime environment for Java" | Installate [MATLAB Support for OpenJDK](https://www.mathworks.com/matlabcentral/fileexchange/180823-matlab-support-for-openjdk) e riavviate MATLAB |
+| "Il vostro MATLAB è più vecchio…" | Installate **Deep Learning Toolbox Converter for ONNX Model Format** da Home → Add-Ons e riprovate |
 | "Serve Deep Learning Toolbox" | **Home → Add-Ons → Get Add-Ons**, cercate Deep Learning Toolbox e installatelo, poi rieseguite `INIZIA_QUI` |
