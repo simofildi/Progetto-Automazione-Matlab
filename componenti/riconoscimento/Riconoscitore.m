@@ -202,7 +202,11 @@ classdef Riconoscitore < handle
             try
                 net = importNetworkFromONNX(temp, Namespace = spazio, GenerateCoderFiles = false);
             catch
-                net = importNetworkFromONNX(temp, Namespace = spazio);   % MATLAB senza questa opzione
+                try
+                    net = importNetworkFromONNX(temp, Namespace = spazio);     % MATLAB senza GenerateCoderFiles
+                catch
+                    net = importNetworkFromONNX(temp, PackageName = spazio);   % R2023b: "PackageName"
+                end
             end
             clear ripristinaAvvisi
             prova = extractdata(predict(net, dlarray(zeros(640, 640, 3, 'single'), 'SSCB')));
